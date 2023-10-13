@@ -8,11 +8,8 @@ import androidx.room.TypeConverters
     entities = [Run::class],
     version = 1
 )
-
 @TypeConverters(Converters::class)
 abstract class RunningDatabase : RoomDatabase() {
 
     abstract fun getRunDao(): RunDAO
-
-    // dagger will do
 }
