@@ -1,6 +1,7 @@
 package com.brandon.running_app.services
 
 
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.NotificationManager.IMPORTANCE_LOW
@@ -10,19 +11,27 @@ import android.content.Context
 import android.content.Intent
 import android.location.Location
 import android.os.Build
+import android.os.Looper
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import com.brandon.running_app.R
 import com.brandon.running_app.other.Constants.ACTION_PAUSE_SERVICE
 import com.brandon.running_app.other.Constants.ACTION_SHOW_TRACKING_FRAGMENT
 import com.brandon.running_app.other.Constants.ACTION_START_OR_RESUME_SERVICE
 import com.brandon.running_app.other.Constants.ACTION_STOP_SERVICE
+import com.brandon.running_app.other.Constants.FASTEST_LOCATION_INTERVAL
+import com.brandon.running_app.other.Constants.LOCATION_UPDATE_INTERVAL
 import com.brandon.running_app.other.Constants.NOTIFICATION_CHANNEL_ID
 import com.brandon.running_app.other.Constants.NOTIFICATION_CHANNEL_NAME
 import com.brandon.running_app.other.Constants.NOTIFICATION_ID
+import com.brandon.running_app.other.TrackingUtility
 import com.brandon.running_app.ui.MainActivity
+import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationRequest.PRIORITY_HIGH_ACCURACY
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.maps.model.LatLng
 import timber.log.Timber
@@ -34,6 +43,8 @@ class TrackingService : LifecycleService() {
 
     var isFirstRun = true
 
+    lateinit var fusedLocatinoProviderClient: FusedLocationProviderClient
+
     companion object {
         val isTracking = MutableLiveData<Boolean>()
         val pathPoints = MutableLiveData<Polylines>()  // MutableList<LatLng>> 은 하나의 poly line
@@ -42,6 +53,16 @@ class TrackingService : LifecycleService() {
     private fun postInitialValues() {
         isTracking.postValue(false)
         pathPoints.postValue(mutableListOf())
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        postInitialValues()
+        fusedLocatinoProviderClient = FusedLocationProviderClient(this)
+
+        isTracking.observe(this, Observer {
+            updateLocationTracking(it)
+        })
     }
 
     // TrackingService에서 command를 받을 때마다 호출되는 함수
@@ -69,6 +90,26 @@ class TrackingService : LifecycleService() {
         return super.onStartCommand(intent, flags, startId)
     }
 
+    @SuppressLint("MissingPermission")
+    private fun updateLocationTracking(isTracking: Boolean) {
+        if(isTracking){
+            if(TrackingUtility.hasLocationPermissions(this)){
+                val request = LocationRequest().apply{
+                    interval = LOCATION_UPDATE_INTERVAL
+                    fastestInterval = FASTEST_LOCATION_INTERVAL
+                    priority = PRIORITY_HIGH_ACCURACY
+                }
+                fusedLocatinoProviderClient.requestLocationUpdates(
+                    request,
+                    locationCallback,
+                    Looper.getMainLooper()
+                )
+            }
+        }else{
+            fusedLocatinoProviderClient.removeLocationUpdates(locationCallback)
+        }
+    }
+
     val locationCallback = object : LocationCallback() {
         override fun onLocationResult(result: LocationResult?) {
             super.onLocationResult(result)
@@ -76,6 +117,7 @@ class TrackingService : LifecycleService() {
                 result?.locations?.let { locations ->
                     for (location in locations) {
                         addPathPoint(location)
+                        Timber.d("NEW LOCATION: ${location.latitude}, ${location.longitude}")
                     }
                 }
             }
@@ -99,6 +141,7 @@ class TrackingService : LifecycleService() {
 
     private fun startForegroundService() {
         addEmptyPolyline()
+        isTracking.postValue(true)
 
         val notificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
