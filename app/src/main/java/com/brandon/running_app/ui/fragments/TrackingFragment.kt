@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
@@ -15,6 +16,7 @@ import com.brandon.running_app.other.Constants.ACTION_START_OR_RESUME_SERVICE
 import com.brandon.running_app.other.Constants.MAP_ZOOM
 import com.brandon.running_app.other.Constants.POLYLINE_COLOR
 import com.brandon.running_app.other.Constants.POLYLINE_WIDTH
+import com.brandon.running_app.other.TrackingUtility
 import com.brandon.running_app.services.Polyline
 import com.brandon.running_app.services.TrackingService
 import com.brandon.running_app.ui.viewmodels.MainViewModel
@@ -35,8 +37,11 @@ class TrackingFragment : Fragment(R.layout.fragment_statistics) {
     private var isTracking = false
     private var pathPoints = mutableListOf<Polyline>()
 
+    private var curTimeInMillis = 0L
+
     lateinit var btnToggleRun: Button
     lateinit var btnFinishRun: Button
+    lateinit var tvTimer: TextView
 
 
     override fun onCreateView(
@@ -52,6 +57,7 @@ class TrackingFragment : Fragment(R.layout.fragment_statistics) {
 //        val rootView = getView()
         btnToggleRun = view.findViewById<Button>(R.id.btnToggleRun)
         btnFinishRun = view.findViewById(R.id.btnFinishRun)
+        tvTimer = view.findViewById(R.id.tvTimer)
 
         btnToggleRun.setOnClickListener {
             toggleRun()
@@ -76,6 +82,12 @@ class TrackingFragment : Fragment(R.layout.fragment_statistics) {
             pathPoints = it
             addLatestPolyline()
             moveCameraToUser()
+        })
+
+        TrackingService.timeRunInMillis.observe(viewLifecycleOwner, Observer {
+            curTimeInMillis = it
+            val formattedTime = TrackingUtility.getFormattedStopWatchTime(curTimeInMillis, true)
+            tvTimer.text = formattedTime
         })
     }
 
