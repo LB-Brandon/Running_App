@@ -12,8 +12,11 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Singleton
 
 @Module
-@InstallIn(ApplicationComponent::class)  // dependency 의 유지 기간 설정, Service, Activity, Fragment 등 다른 설정 존재
+@InstallIn(ApplicationComponent::class)  // dependency 의 생성 시기와 삭제 시기 지정, Service, Activity, Fragment 등 다른 설정 존재
 object AppModule {
+
+    // InstallIn() 어노테이션을 통해 종속성의 생애주기를 설정하고
+    // @Singleton은 그 생애주기 동안 하나의 객체만을 사용하겠 선언
 
     // 데이터베이스 생성 메뉴얼
     @Singleton // 이 함수의 결과로 생성한 종속성을 싱글톤으로 관리
@@ -31,7 +34,6 @@ object AppModule {
     @Singleton
     @Provides
     fun provideRunDao(db: RunningDatabase) = db.getRunDao()
-
 
 
 
