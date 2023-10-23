@@ -16,15 +16,15 @@ class MainRepository @Inject constructor(
     suspend fun deleteRun(run: Run) = runDao.deleteRun(run)
 
     // 아래가 suspend 함수가 아닌 이유는 getAllRunsSortedByDate()는 Livedata를 반환하고 이는 비동기식 이므로
-    fun getAllRunsSortedByDate(run: Run) = runDao.getAllRunsSortedByDate()
+    fun getAllRunsSortedByDate() = runDao.getAllRunsSortedByDate()
 
-    fun getAllRunsSortedByDistance(run: Run) = runDao.getAllRunsSortedByDistance()
+    fun getAllRunsSortedByDistance() = runDao.getAllRunsSortedByDistance()
 
-    fun getAllRunsSortedByTimeInMillis(run: Run) = runDao.getAllRunsSortedByTimeInMillis()
+    fun getAllRunsSortedByTimeInMillis() = runDao.getAllRunsSortedByTimeInMillis()
 
-    fun getAllRunsSortedByAvgSpeed(run: Run) = runDao.getTotalAvgSpeed()
+    fun getAllRunsSortedByAvgSpeed() = runDao.getAllRunsSortedByAvgSpeed()
 
-    fun getAllRunsSortedByCaloriesBurned(run: Run) = runDao.getAllRunsSortedByCaloriesBurned()
+    fun getAllRunsSortedByCaloriesBurned() = runDao.getAllRunsSortedByCaloriesBurned()
 
     fun getTotalAvgSpeed() = runDao.getTotalAvgSpeed()
 
