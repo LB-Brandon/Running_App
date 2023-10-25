@@ -87,11 +87,11 @@ class TrackingFragment : Fragment(R.layout.fragment_statistics) {
             map = it
             addAllPolylines()
         }
-        subsribeToObservers()
+        subscribeToObservers()
 
     }
 
-    private fun subsribeToObservers() {
+    private fun subscribeToObservers() {
         TrackingService.isTracking.observe(viewLifecycleOwner, Observer {
             updateTracking(it)
         })
@@ -161,10 +161,10 @@ class TrackingFragment : Fragment(R.layout.fragment_statistics) {
 
     private fun updateTracking(isTracking: Boolean) {
         this.isTracking = isTracking
-        if (!isTracking) {
+        if (!isTracking && curTimeInMillis > 0L) {
             btnToggleRun.text = "Start"
             btnFinishRun.visibility = View.VISIBLE
-        } else {
+        } else if(isTracking){
             btnToggleRun.text = "Stop"
             menu?.getItem(0)?.isVisible = true
             btnFinishRun.visibility = View.GONE
