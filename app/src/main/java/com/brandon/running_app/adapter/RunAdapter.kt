@@ -46,6 +46,7 @@ class RunAdapter : RecyclerView.Adapter<RunAdapter.RunViewHolder>() {
         val tvDistance = holder.itemView.findViewById<TextView>(R.id.tvDistance)
         val tvTime = holder.itemView.findViewById<TextView>(R.id.tvTime)
         val tvCalories = holder.itemView.findViewById<TextView>(R.id.tvCalories)
+
         holder.itemView.apply{
             Glide.with(this).load(run.img).into(ivRunImage)
 
@@ -59,7 +60,7 @@ class RunAdapter : RecyclerView.Adapter<RunAdapter.RunViewHolder>() {
             val avgSpeed = "${run.avgSpeedInKMH}km/h"
             tvAvgSpeed.text = avgSpeed
 
-            val distanceInKm = "${run.distanceInMeters}"
+            val distanceInKm = "${run.distanceInMeters / 1000f}km"
             tvDistance.text = distanceInKm
 
             tvTime.text = TrackingUtility.getFormattedStopWatchTime(run.timeInMillis)

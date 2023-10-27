@@ -33,8 +33,8 @@ class RunFragment : Fragment(R.layout.fragment_run), EasyPermissions.PermissionC
     private lateinit var runAdapter: RunAdapter
 
     lateinit var rvRuns: RecyclerView
-    lateinit var fab : FloatingActionButton
-    lateinit var spFilter : Spinner
+    lateinit var fab: FloatingActionButton
+    lateinit var spFilter: Spinner
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -57,7 +57,7 @@ class RunFragment : Fragment(R.layout.fragment_run), EasyPermissions.PermissionC
 
 
         spFilter = view.findViewById(R.id.spFilter)
-        when(viewModel.sortType) {
+        when (viewModel.sortType) {
             SortType.DATE -> spFilter.setSelection(0)
             SortType.RUNNING_TIME -> spFilter.setSelection(1)
             SortType.DISTANCE -> spFilter.setSelection(2)
@@ -72,7 +72,7 @@ class RunFragment : Fragment(R.layout.fragment_run), EasyPermissions.PermissionC
                 position: Int,
                 id: Long
             ) {
-                when(position){
+                when (position) {
                     0 -> viewModel.sortRuns(SortType.DATE)
                     1 -> viewModel.sortRuns(SortType.RUNNING_TIME)
                     2 -> viewModel.sortRuns(SortType.DISTANCE)
@@ -88,10 +88,8 @@ class RunFragment : Fragment(R.layout.fragment_run), EasyPermissions.PermissionC
 
 
         fab = view.findViewById(R.id.fab)
-        fab.let {
-            fab.setOnClickListener{
-                findNavController().navigate(R.id.action_runFragment_to_trackingFragment)
-            }
+        fab.setOnClickListener {
+            findNavController().navigate(R.id.action_runFragment_to_trackingFragment)
         }
 
     }

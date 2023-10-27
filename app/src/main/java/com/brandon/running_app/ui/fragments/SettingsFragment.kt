@@ -37,6 +37,8 @@ class SettingsFragment : Fragment(R.layout.fragment_settings) {
         etWeight = view.findViewById(R.id.etWeight)
         btnApplyChanges = view.findViewById(R.id.btnApplyChanges)
 
+        loadFieldsFromSharedPref()
+
         btnApplyChanges.setOnClickListener {
             val success = applyChangesToSharedPref()
             if(success){

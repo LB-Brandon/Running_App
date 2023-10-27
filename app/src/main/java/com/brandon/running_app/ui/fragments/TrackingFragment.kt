@@ -150,7 +150,7 @@ class TrackingFragment : Fragment(R.layout.fragment_statistics) {
             }
             .setNegativeButton("No") { dialogInterface, _ ->
                 dialogInterface.cancel()
-            }
+            }.create()
         dialog.show()
     }
 
@@ -169,7 +169,6 @@ class TrackingFragment : Fragment(R.layout.fragment_statistics) {
             menu?.getItem(0)?.isVisible = true
             btnFinishRun.visibility = View.GONE
         }
-
     }
 
     private fun moveCameraToUser() {
@@ -207,7 +206,7 @@ class TrackingFragment : Fragment(R.layout.fragment_statistics) {
             for(polyline in pathPoints){
                 distanceInMeters += TrackingUtility.calculatePolylineLength(polyline).toInt()
             }
-            val avgSpeed = round((distanceInMeters / 1000f) / (curTimeInMillis / 1000f / 60 / 60)) / 10f
+            val avgSpeed = round((distanceInMeters / 1000f) / (curTimeInMillis / 1000f / 60 / 60) * 10) / 10f
             val dateTimestamp = Calendar.getInstance().timeInMillis
             val caloriesBurned = ((distanceInMeters/ 1000f) * weight).toInt()
             val run = Run(bmp, dateTimestamp, avgSpeed, distanceInMeters, curTimeInMillis, caloriesBurned)
@@ -218,7 +217,6 @@ class TrackingFragment : Fragment(R.layout.fragment_statistics) {
                 Snackbar.LENGTH_LONG
             ).show()
             stopRun()
-
         }
     }
 

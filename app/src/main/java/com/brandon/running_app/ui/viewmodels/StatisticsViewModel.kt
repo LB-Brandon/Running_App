@@ -14,5 +14,6 @@ class StatisticsViewModel @ViewModelInject constructor(
     val totalCaloriesBurned = mainRepository.getTotalCaloriesBurned()
     val totalAvgSpeed = mainRepository.getTotalCaloriesBurned()
 
+    // graph 를 그리기 위한 데이터
     val runsSortedByDate = mainRepository.getAllRunsSortedByDate()
 }

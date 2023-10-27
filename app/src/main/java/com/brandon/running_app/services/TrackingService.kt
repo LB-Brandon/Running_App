@@ -18,7 +18,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
 import com.brandon.running_app.R
 import com.brandon.running_app.other.Constants.ACTION_PAUSE_SERVICE
-import com.brandon.running_app.other.Constants.ACTION_SHOW_TRACKING_FRAGMENT
 import com.brandon.running_app.other.Constants.ACTION_START_OR_RESUME_SERVICE
 import com.brandon.running_app.other.Constants.ACTION_STOP_SERVICE
 import com.brandon.running_app.other.Constants.FASTEST_LOCATION_INTERVAL
@@ -28,7 +27,6 @@ import com.brandon.running_app.other.Constants.NOTIFICATION_CHANNEL_NAME
 import com.brandon.running_app.other.Constants.NOTIFICATION_ID
 import com.brandon.running_app.other.Constants.TIMER_UPDATE_INTERVAL
 import com.brandon.running_app.other.TrackingUtility
-import com.brandon.running_app.ui.MainActivity
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -53,14 +51,18 @@ class TrackingService : LifecycleService() {
     var serviceKilled = false
 
     @Inject
-    lateinit var fusedLocatinoProviderClient: FusedLocationProviderClient
-
-    private val timeRunInSeconds = MutableLiveData<Long>()  // second
-
-    lateinit var curNotificationBuilder: NotificationCompat.Builder
+    lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
     @Inject
     lateinit var baseNotificationBuilder: NotificationCompat.Builder
+
+    lateinit var curNotificationBuilder: NotificationCompat.Builder
+
+    private val timeRunInSeconds = MutableLiveData<Long>()  // second
+
+
+
+
 
 
     companion object {
@@ -69,24 +71,26 @@ class TrackingService : LifecycleService() {
         val pathPoints = MutableLiveData<Polylines>()  // MutableList<LatLng>> 은 하나의 poly line
     }
 
-    private fun postInitialValues() {
-        isTracking.postValue(false)
-        pathPoints.postValue(mutableListOf())
-        timeRunInSeconds.postValue(0L)
-        timeRunInMillis.postValue(0L)
-    }
+
 
     override fun onCreate() {
         super.onCreate()
         // notification 업데이트를 위한 초기화
         curNotificationBuilder = baseNotificationBuilder
         postInitialValues()
-        fusedLocatinoProviderClient = FusedLocationProviderClient(this)
+        fusedLocationProviderClient = FusedLocationProviderClient(this)
 
         isTracking.observe(this, Observer {
             updateLocationTracking(it)
             updateNotificationTackingState(it)
         })
+    }
+
+    private fun postInitialValues() {
+        isTracking.postValue(false)
+        pathPoints.postValue(mutableListOf())
+        timeRunInSeconds.postValue(0L)
+        timeRunInMillis.postValue(0L)
     }
 
     private fun killService(){
@@ -127,9 +131,9 @@ class TrackingService : LifecycleService() {
     }
 
     private var isTimerEnabled = false
-    private var lapTime = 0L
-    private var timeRun = 0L
-    private var timeStarted = 0L
+    private var lapTime = 0L        // start -> stop 시간
+    private var timeRun = 0L        // 모든 구간 시간의 합
+    private var timeStarted = 0L    // 타이머 시작 시간
     private var lastSecondTimestamp = 0L
 
     private fun startTimer() {
@@ -141,6 +145,7 @@ class TrackingService : LifecycleService() {
             while (isTracking.value!!) {
                 // time difference between now and time started
                 lapTime = System.currentTimeMillis() - timeStarted
+                // post the new lapTime
                 timeRunInMillis.postValue(timeRun + lapTime)
                 if (timeRunInMillis.value!! >= lastSecondTimestamp + 1000L) {
                     timeRunInSeconds.postValue(timeRunInSeconds.value!! + 1)
@@ -194,14 +199,14 @@ class TrackingService : LifecycleService() {
                     fastestInterval = FASTEST_LOCATION_INTERVAL
                     priority = PRIORITY_HIGH_ACCURACY
                 }
-                fusedLocatinoProviderClient.requestLocationUpdates(
+                fusedLocationProviderClient.requestLocationUpdates(
                     request,
                     locationCallback,
                     Looper.getMainLooper()
                 )
             }
         } else {
-            fusedLocatinoProviderClient.removeLocationUpdates(locationCallback)
+            fusedLocationProviderClient.removeLocationUpdates(locationCallback)
         }
     }
 
@@ -223,7 +228,7 @@ class TrackingService : LifecycleService() {
         location?.let {
             val pos = LatLng(location.latitude, location.longitude)
             pathPoints.value?.apply {
-                last().add(pos)
+                last().add(pos)  // pathPoints의 원소 중 마지막 리스트를 가져와 pos 정보를 추가한다
                 pathPoints.postValue(this)  // livedata 변경을 알림
             }
         }

@@ -18,6 +18,7 @@ import com.brandon.running_app.other.Constants.KEY_WEIGHT
 import com.brandon.running_app.ui.MainActivity
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import timber.log.Timber
 import javax.inject.Inject
 
 @AndroidEntryPoint
